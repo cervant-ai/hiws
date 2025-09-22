@@ -368,8 +368,9 @@ class WhatsappMessenger:
                 details=str(e),
             ) from e
 
-        message_id = data.get("message_id") or data.get("id")
-        if not message_id:
+        try:
+            message_id = data["messages"][0]["id"]
+        except (IndexError, KeyError):
             raise WhatsappApiException(
                 message="Missing message_id in successful response",
                 endpoint=url,
