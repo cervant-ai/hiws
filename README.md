@@ -16,7 +16,7 @@ from hiws import WhatsAppMessenger
 messenger = WhatsAppMessenger(access_token="YOUR_ACCESS_TOKEN", phone_number_id="YOUR_PHONE_NUMBER_ID")
 
 # Example usage
-message_id = await messenger.send_text("Hello, World!", recipient_id="RECIPIENT_ID")
+message_id = await messenger.send_text(recipient_phone_number="1234567890", text="Hello, World!")
 
 print(message_id)
 ```
