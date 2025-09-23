@@ -39,3 +39,32 @@ class Entry(BaseModel):
 class Update(BaseModel):
     object: str
     entry: List[Entry]
+    
+    # helper properties to access nested data easily
+    @property
+    def message(self) -> Optional[Message]:
+        for entry in self.entry:
+            for change in entry.changes:
+                if change.value.messages:
+                    return change.value.messages[0]
+        return None
+    @property
+    def changed_field(self) -> Optional[str]:
+        for entry in self.entry:
+            for change in entry.changes:
+                return change.field
+        return None
+    @property
+    def status(self) -> Optional[Status]:
+        for entry in self.entry:
+            for change in entry.changes:
+                if change.value.statuses:
+                    return change.value.statuses[0]
+        return None
+    @property
+    def contact(self) -> Optional[RequestContact]:
+        for entry in self.entry:
+            for change in entry.changes:
+                if change.value.contacts:
+                    return change.value.contacts[0]
+        return None
