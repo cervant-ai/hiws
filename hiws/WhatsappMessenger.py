@@ -1,11 +1,13 @@
 import httpx
 from hiws.types.exceptions import WhatsappApiException
 from hiws.types import Contact
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, overload
+from hiws.internal.helpers import amake_cloud_api_request
 
 
 BASE_URL = "https://graph.facebook.com/{API_VERSION}"
 MESSAGES_ENDPOINT = "/{phone_number_id}/messages"
+MEDIA_ENDPOINT = "/{phone_number_id}/media"
 DEFAULT_TIMEOUT = 15.0
 
 
@@ -37,7 +39,12 @@ class WhatsappMessenger:
         self.api_version = api_version
         self.base_url = BASE_URL.format(API_VERSION=self.api_version)
         self.messages_endpoint = MESSAGES_ENDPOINT.format(phone_number_id=self.phone_number_id)
+        self.media_endpoint = MEDIA_ENDPOINT.format(phone_number_id=self.phone_number_id)
         self.request_timeout = request_timeout
+        self.default_headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json",
+        }
 
     async def send_text(
         self, 
@@ -298,10 +305,57 @@ class WhatsappMessenger:
         }
         
         await self._send_mark_as_read_payload(payload)
+
+    async def get_media_url(
+        self,
+        media_id: str,
+    ) -> str:
+        url = f"{self.base_url}/{media_id}"
         
+        response = await amake_cloud_api_request(
+            "GET",
+            url,
+            self.default_headers
+        )
         
+        try: 
+            data = response.json()
+            return data.get("url")
+        except Exception as e:
+            raise WhatsappApiException(
+                message="Failed to parse JSON response",
+                endpoint=self.messages_endpoint,
+                method="POST",
+                payload=None,
+                status_code=response.status_code,
+                details=str(e),
+            ) from e
+    @overload     
+    async def query_media_url(
+        self,
+        media_url: str,
+    ) -> bytes:
     
+        response = await amake_cloud_api_request(
+            "GET",
+            media_url,
+            self.default_headers
+        )
+        return response.content
     
+    @overload
+    async def query_media_url(
+        self,
+        media_url: str,
+        file_path: str
+    ) -> None:
+        response = await amake_cloud_api_request(
+            "GET",
+            media_url,
+            self.default_headers
+        )
+        with open(file_path, "wb") as f:
+            f.write(response.content)
 
     async def _send_media(
         self,
@@ -408,14 +462,10 @@ class WhatsappMessenger:
 
     async def _send_payload(self, endpoint: str, payload: dict) -> httpx.Response:
         url = f"{self.base_url}{endpoint}"
-        headers = {
-            "Authorization": f"Bearer {self.access_token}",
-            "Content-Type": "application/json",
-        }
 
         try:
             async with httpx.AsyncClient(timeout=self.request_timeout) as client:
-                response = await client.post(url, json=payload, headers=headers)
+                response = await client.post(url, json=payload, headers=self.default_headers)
         except httpx.RequestError as e:
             raise WhatsappApiException(
                 message="Network error while sending payload",
