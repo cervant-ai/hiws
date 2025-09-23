@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="hiws",
-    version="0.1.1",
+    version="0.1.2",
     author="Tomas Santana",
     author_email="tomas@cervant.chat",
     description="A simple Python wrapper for WhatsApp's Cloud API",
