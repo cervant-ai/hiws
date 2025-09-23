@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Union, Literal
 from hiws.types.message.contact import Contact
 
 
@@ -13,7 +13,7 @@ class Text(BaseModel):
 
 class TextMessage(BaseMessage):
     text: Text
-    type: str = "text"
+    type: Literal["text"] = "text"
     
 class Reaction(BaseModel):
     message_id: str
@@ -21,7 +21,7 @@ class Reaction(BaseModel):
     
 class ReactionMessage(BaseMessage):
     reaction: Reaction
-    type: str = "reaction"
+    type: Literal["reaction"] = "reaction"
     
 class Media(BaseModel):
     id: str
@@ -31,11 +31,11 @@ class Media(BaseModel):
     
 class ImageMessage(BaseMessage):
     image: Media
-    type: str = "image"
+    type: Literal["image"] = "image"
     
 class StickerMessage(BaseMessage):
     sticker: Media
-    type: str = "sticker"
+    type: Literal["sticker"] = "sticker"
     
 class MessageError(BaseModel):
     code: int
@@ -44,7 +44,7 @@ class MessageError(BaseModel):
 
 class UnknownMessage(BaseModel):
     errors: List[MessageError]
-    type: str = "unknown"
+    type: Literal["unknown"] = "unknown"
     
 class Location(BaseModel):
     latitude: float
@@ -54,11 +54,11 @@ class Location(BaseModel):
     
 class LocationMessage(BaseMessage):
     location: Location
-    type: str = "location"
+    type: Literal["location"] = "location"
     
 class ContactMessage(BaseMessage):
     contacts: List[Contact]
-    type: str = "contacts"
+    type: Literal["contacts"] = "contacts"
     
 class Button(BaseModel):
     text: str
@@ -66,16 +66,26 @@ class Button(BaseModel):
     
 class QuickReplyButtonMessage(BaseMessage):
     button: Button
-    type: str = "button"
+    type: Literal["button"] = "button"
     
 class SystemUpdate(BaseModel):
     body: str
-    type: str = "system"
+    type: Literal["system"] = "system"
     new_wa_id: Optional[str]
     
 class SystemMessage(BaseMessage):
     system: SystemUpdate
-    type: str = "system"
+    type: Literal["system"] = "system"
     
 
-type Message = TextMessage | ReactionMessage | ImageMessage | StickerMessage | LocationMessage | QuickReplyButtonMessage | SystemMessage | UnknownMessage
+Message = Union[
+    TextMessage,
+    ReactionMessage,
+    ImageMessage,
+    StickerMessage,
+    LocationMessage,
+    QuickReplyButtonMessage,
+    SystemMessage,
+    UnknownMessage,
+]
+    
