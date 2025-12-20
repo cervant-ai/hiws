@@ -7,7 +7,7 @@ name = "hiws"
 version = "0.3.0"
 description = "A wrapper for WhatsApp's Cloud API"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [
     {name = "Tomas Santana", email = "tomas@cervant.chat"},
