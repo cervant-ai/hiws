@@ -330,18 +330,13 @@ class WhatsappMessenger:
                 status_code=response.status_code,
                 details=str(e),
             ) from e
+            
     @overload     
     async def query_media_url(
         self,
         media_url: str,
     ) -> bytes:
-    
-        response = await amake_cloud_api_request(
-            "GET",
-            media_url,
-            self.default_headers
-        )
-        return response.content
+        pass
     
     @overload
     async def query_media_url(
@@ -349,13 +344,24 @@ class WhatsappMessenger:
         media_url: str,
         file_path: str
     ) -> None:
+        pass
+            
+    async def query_media_url(
+        self,
+        media_url: str,
+        file_path: Optional[str] = None
+    ) -> Optional[bytes]:
         response = await amake_cloud_api_request(
             "GET",
             media_url,
             self.default_headers
         )
-        with open(file_path, "wb") as f:
-            f.write(response.content)
+        if file_path:
+            with open(file_path, "wb") as f:
+                f.write(response.content)
+            return None
+        else:
+            return response.content
 
     async def _send_media(
         self,
