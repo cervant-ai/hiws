@@ -32,6 +32,27 @@ class Media(BaseModel):
 class ImageMessage(BaseMessage):
     image: Media
     type: Literal["image"] = "image"
+
+class Audio(BaseModel):
+    id: str
+    mime_type: str
+    sha256: Optional[str] = None
+    voice: Optional[bool] = None
+
+class AudioMessage(BaseMessage):
+    audio: Audio
+    type: Literal["audio"] = "audio"
+
+class Document(BaseModel):
+    id: str
+    mime_type: str
+    sha256: Optional[str] = None
+    filename: Optional[str] = None
+    caption: Optional[str] = None
+
+class DocumentMessage(BaseMessage):
+    document: Document
+    type: Literal["document"] = "document"
     
 class StickerMessage(BaseMessage):
     sticker: Media
@@ -82,6 +103,8 @@ Message = Union[
     TextMessage,
     ReactionMessage,
     ImageMessage,
+    AudioMessage,
+    DocumentMessage,
     StickerMessage,
     LocationMessage,
     QuickReplyButtonMessage,
