@@ -4,15 +4,15 @@ from typing import List, Literal, Optional
 class StatusPricing(BaseModel):
     pricing_model: str
     billable: bool
-    category: Optional[str]
+    category: Optional[str] = None
 
 class StatusConversationOrigin(BaseModel):
     type: str
     
 class StatusConversation(BaseModel):
     id: str
-    expiration_timestamp: Optional[str]
-    origin: Optional[StatusConversationOrigin]
+    expiration_timestamp: Optional[str] = None
+    origin: Optional[StatusConversationOrigin] = None
     
 class StatusErrorData(BaseModel):
     details: str
@@ -20,9 +20,9 @@ class StatusErrorData(BaseModel):
 class StatusError(BaseModel):
     code: int
     title: str
-    message: Optional[str]
-    error_data: Optional[StatusErrorData]
-    href: Optional[str]
+    message: Optional[str] = None
+    error_data: Optional[StatusErrorData] = None
+    href: Optional[str] = None
     
 
 class BaseStatus(BaseModel):
