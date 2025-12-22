@@ -21,7 +21,7 @@ class Metadata(BaseModel):
 class Value(BaseModel):
     messaging_product: str
     metadata: Metadata
-    contacts: List[RequestContact]
+    contacts: Optional[List[RequestContact]] = None
     messages: Optional[List[Message]] = None
     statuses: Optional[List[Status]] = None
 
