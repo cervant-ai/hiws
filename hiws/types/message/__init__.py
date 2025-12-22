@@ -63,7 +63,7 @@ class MessageError(BaseModel):
     details: str
     title: str
 
-class UnknownMessage(BaseModel):
+class UnsupportedMessage(BaseMessage):
     errors: List[MessageError]
     type: Literal["unknown"] = "unknown"
     
@@ -98,6 +98,23 @@ class SystemMessage(BaseMessage):
     system: SystemUpdate
     type: Literal["system"] = "system"
     
+class ListReply(BaseModel):
+    id: str
+    title: str
+    description: Optional[str] = None
+
+class ButtonReply(BaseModel):
+    id: str
+    title: str
+
+class Interactive(BaseModel):
+    type: Literal["list_reply", "button_reply"]
+    list_reply: Optional[ListReply] = None
+    button_reply: Optional[ButtonReply] = None
+
+class InteractiveMessage(BaseMessage):
+    interactive: Interactive
+    type: Literal["interactive"] = "interactive"
 
 Message = Union[
     TextMessage,
@@ -108,7 +125,9 @@ Message = Union[
     StickerMessage,
     LocationMessage,
     QuickReplyButtonMessage,
+    ContactMessage,
     SystemMessage,
-    UnknownMessage,
+    InteractiveMessage,
+    UnsupportedMessage,
 ]
     
