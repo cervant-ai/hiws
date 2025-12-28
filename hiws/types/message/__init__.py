@@ -57,15 +57,23 @@ class DocumentMessage(BaseMessage):
 class StickerMessage(BaseMessage):
     sticker: Media
     type: Literal["sticker"] = "sticker"
+
+class ErrorData(BaseModel):
+    details: str
     
 class MessageError(BaseModel):
     code: int
-    details: str
     title: str
+    message: str
+    error_data: ErrorData
+    
+class Unsupported(BaseModel):
+    type: Literal["edit", "poll", "button"]
 
 class UnsupportedMessage(BaseMessage):
     errors: List[MessageError]
-    type: Literal["unknown"] = "unknown"
+    type: Literal["unsupported"] = "unsupported"
+    unsupported: Unsupported
     
 class Location(BaseModel):
     latitude: float

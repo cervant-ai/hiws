@@ -8,8 +8,6 @@ from hiws.types.message import (
     LocationMessage,
     QuickReplyButtonMessage,
     ContactMessage,
-    ReactionMessage,
-    StickerMessage,
     InteractiveMessage,
     UnsupportedMessage
 )
@@ -478,6 +476,7 @@ def test_interactive_list_reply_message_payload():
     update = Update.model_validate(payload)
     assert isinstance(update.message, InteractiveMessage)
     assert update.message.interactive.type == "list_reply"
+    assert update.message.interactive.list_reply is not None
     assert update.message.interactive.list_reply.id == "<ROW_ID>"
     assert update.message.interactive.list_reply.title == "<ROW_TITLE>"
     assert update.message.interactive.list_reply.description == "<ROW_DESCRIPTION>"
@@ -534,6 +533,7 @@ def test_interactive_button_reply_message_payload():
     update = Update.model_validate(payload)
     assert isinstance(update.message, InteractiveMessage)
     assert update.message.interactive.type == "button_reply"
+    assert update.message.interactive.button_reply is not None
     assert update.message.interactive.button_reply.id == "<BUTTON_ID>"
     assert update.message.interactive.button_reply.title == "<BUTTON_LABEL_TEXT>"
 
@@ -583,3 +583,66 @@ def test_status_update_payload():
     assert update.status is not None
     assert update.status.status == "delivered"
     assert update.status.recipient_id == "16505551234"
+    
+def test_unsupported_message_payload():
+    payload = {
+        "object": "whatsapp_business_account",
+        "entry": [
+            {
+            "id": "102290129340398",
+            "changes": [
+                {
+                "value": {
+                    "messaging_product": "whatsapp",
+                    "metadata": {
+                    "display_phone_number": "15550783881",
+                    "phone_number_id": "106540352242922"
+                    },
+                    "contacts": [
+                    {
+                        "profile": {
+                        "name": "Sheena Nelson"
+                        },
+                        "wa_id": "16505551234"
+                    }
+                    ],
+                    "messages": [
+                    {
+                        "from": "16505551234",
+                        "id": "wamid.HBgLMTY1MDM4Nzk0MzkVAgASGBQzQUFERjg0NDEzNDdFODU3MUMxMAA=",
+                        "timestamp": "1750090702",
+                        "errors": [
+                        {
+                            "code": 131051,
+                            "title": "Message type unknown",
+                            "message": "Message type unknown",
+                            "error_data": {
+                            "details": "Message type is currently not supported."
+                            }
+                        }
+                        ],
+                        "type": "unsupported",
+                        "unsupported": {
+                        "type": "edit"
+            }
+                    }
+                    ]
+                },
+                "field": "messages"
+                }
+            ]
+            }
+        ]
+        }
+    update = Update.model_validate(payload)
+    assert isinstance(update.message, UnsupportedMessage)
+    assert len(update.message.errors) == 1
+    error = update.message.errors[0]
+    assert error.code == 131051
+    assert error.title == "Message type unknown"
+    assert error.message == "Message type unknown"
+    assert error.error_data.details == "Message type is currently not supported."
+    assert update.message.unsupported.type == "edit"
+
+
+
