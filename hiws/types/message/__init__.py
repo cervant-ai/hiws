@@ -26,7 +26,7 @@ class ReactionMessage(BaseMessage):
 class Media(BaseModel):
     id: str
     mime_type: str
-    caption: str
+    caption: Optional[str] = None
     sha256: str
     
 class ImageMessage(BaseMessage):
