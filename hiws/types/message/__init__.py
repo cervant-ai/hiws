@@ -78,8 +78,8 @@ class UnsupportedMessage(BaseMessage):
 class Location(BaseModel):
     latitude: float
     longitude: float
-    name: Optional[str]
-    address: Optional[str]
+    name: Optional[str] = None
+    address: Optional[str] = None
     
 class LocationMessage(BaseMessage):
     location: Location
@@ -91,7 +91,7 @@ class ContactMessage(BaseMessage):
     
 class Button(BaseModel):
     text: str
-    payload: Optional[str]
+    payload: Optional[str] = None
     
 class QuickReplyButtonMessage(BaseMessage):
     button: Button
@@ -100,7 +100,7 @@ class QuickReplyButtonMessage(BaseMessage):
 class SystemUpdate(BaseModel):
     body: str
     type: Literal["system"] = "system"
-    new_wa_id: Optional[str]
+    new_wa_id: Optional[str] = None
     
 class SystemMessage(BaseMessage):
     system: SystemUpdate
