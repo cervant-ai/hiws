@@ -5,6 +5,7 @@ from hiws.types.message.contact import Contact
 
 class BaseMessage(BaseModel):
     from_phone_number: str = Field(alias="from")
+    from_user_id: str
     id: str
     timestamp: str
 

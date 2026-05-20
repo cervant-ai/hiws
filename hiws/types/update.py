@@ -11,6 +11,7 @@ class Profile(BaseModel):
 class RequestContact(BaseModel):
     profile: Optional[Profile] = None
     wa_id: str
+    user_id: Optional[str] = None
 
 
 class Metadata(BaseModel):
