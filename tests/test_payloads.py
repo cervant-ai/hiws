@@ -1,4 +1,3 @@
-import pytest
 from hiws.types import Update
 from hiws.types.message import (
     TextMessage,
@@ -36,6 +35,7 @@ def test_text_message_payload():
                             "messages": [
                                 {
                                     "from": "16505551234",
+                                    "from_user_id": "16505551234",
                                     "id": "wamid.HBgLMTY1M...",
                                     "timestamp": "1654806835",
                                     "text": {"body": "Hello world"},
@@ -56,7 +56,7 @@ def test_text_message_payload():
     assert isinstance(update.message, TextMessage)
     assert update.message.text.body == "Hello world"
     assert update.message.from_phone_number == "16505551234"
-    assert update.contact is not None and update.contact.profile.name == "Sheena Nelson"
+    assert update.contact is not None and update.contact.profile is not None and update.contact.profile.name == "Sheena Nelson"
 
 
 def test_image_message_payload():
@@ -82,6 +82,7 @@ def test_image_message_payload():
                             "messages": [
                                 {
                                     "from": "16505551234",
+                                    "from_user_id": "16505551234",
                                     "id": "wamid.HBgMNTg0MjQ2MjI5MTEyFQIAEhgWM0VCMDZCNjA4MEFFNUM5MjgyNUVFRgA=",
                                     "timestamp": "1767134702",
                                     "type": "image",
@@ -130,6 +131,7 @@ def test_audio_message_payload():
                             "messages": [
                                 {
                                     "from": "16505551234",
+                                    "from_user_id": "16505551234",
                                     "id": "wamid.HBgLMTY1M...",
                                     "timestamp": "1654806835",
                                     "type": "audio",
@@ -179,6 +181,7 @@ def test_document_message_payload():
                             "messages": [
                                 {
                                     "from": "16505551234",
+                                    "from_user_id": "16505551234",
                                     "id": "wamid.HBgLMTY1M...",
                                     "timestamp": "1654806835",
                                     "type": "document",
@@ -230,6 +233,7 @@ def test_location_message_payload():
                             "messages": [
                                 {
                                     "from": "16505551234",
+                                    "from_user_id": "16505551234",
                                     "id": "wamid.HBgLMTY1M...",
                                     "timestamp": "1654806835",
                                     "type": "location",
@@ -284,6 +288,7 @@ def test_quick_reply_button_message_payload():
                                         "id": "<CONTEXTUAL_WHATSAPP_MESSAGE_ID>",
                                     },
                                     "from": "<WHATSAPP_USER_PHONE_NUMBER>",
+                                    "from_user_id": "<WHATSAPP_USER_ID>",
                                     "id": "<WHATSAPP_MESSAGE_ID>",
                                     "timestamp": "<WEBHOOK_TRIGGER_TIMESTAMP>",
                                     "type": "button",
@@ -330,6 +335,7 @@ def test_contact_message_payload():
                             "messages": [
                                 {
                                     "from": "<WHATSAPP_USER_PHONE_NUMBER>",
+                                    "from_user_id": "<WHATSAPP_USER_ID>",
                                     "id": "<WHATSAPP_MESSAGE_ID>",
                                     "timestamp": "<WEBHOOK_TRIGGER_TIMESTAMP>",
                                     "type": "contacts",
@@ -434,6 +440,7 @@ def test_interactive_list_reply_message_payload():
                                         "id": "<CONTEXTUAL_WHATSAPP_MESSAGE_ID>",
                                     },
                                     "from": "<WHATSAPP_USER_PHONE_NUMBER>",
+                                    "from_user_id": "<WHATSAPP_USER_ID>",
                                     "id": "<WHATSAPP_MESSAGE_ID>",
                                     "timestamp": "<WEBHOOK_TRIGGER_TIMESTAMP>",
                                     "type": "interactive",
@@ -490,6 +497,7 @@ def test_interactive_button_reply_message_payload():
                                         "id": "<CONTEXTUAL_WHATSAPP_MESSAGE_ID>",
                                     },
                                     "from": "<WHATSAPP_USER_PHONE_NUMBER>",
+                                    "from_user_id": "<WHATSAPP_USER_ID>",
                                     "id": "<WHATSAPP_MESSAGE_ID>",
                                     "timestamp": "<WEBHOOK_TRIGGER_TIMESTAMP>",
                                     "type": "interactive",
@@ -586,6 +594,7 @@ def test_unsupported_message_payload():
                             "messages": [
                                 {
                                     "from": "16505551234",
+                                    "from_user_id": "16505551234",
                                     "id": "wamid.HBgLMTY1MDM4Nzk0MzkVAgASGBQzQUFERjg0NDEzNDdFODU3MUMxMAA=",
                                     "timestamp": "1750090702",
                                     "errors": [
