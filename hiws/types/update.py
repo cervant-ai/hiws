@@ -9,7 +9,7 @@ class Profile(BaseModel):
 
 
 class RequestContact(BaseModel):
-    profile: Profile
+    profile: Optional[Profile] = None
     wa_id: str
 
 
