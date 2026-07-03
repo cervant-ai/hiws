@@ -571,6 +571,114 @@ def test_status_update_payload():
     assert update.status.recipient_id == "16505551234"
 
 
+def test_sent_status_without_conversation_payload():
+    # Real Meta payload for a `sent` receipt on PMP / free_customer_service pricing:
+    # no `conversation` key. Must still parse (previously raised, returning HTTP 400).
+    payload = {
+        "object": "whatsapp_business_account",
+        "entry": [
+            {
+                "id": "2389676074845113",
+                "changes": [
+                    {
+                        "value": {
+                            "messaging_product": "whatsapp",
+                            "metadata": {
+                                "display_phone_number": "584220161436",
+                                "phone_number_id": "994912140380331",
+                            },
+                            "contacts": [
+                                {
+                                    "wa_id": "584167246483",
+                                    "user_id": "VE.1315310486974362",
+                                }
+                            ],
+                            "statuses": [
+                                {
+                                    "id": "wamid.HBgMNTg0MTY3MjQ2NDgz",
+                                    "status": "sent",
+                                    "timestamp": "1782743472",
+                                    "recipient_id": "584167246483",
+                                    "recipient_user_id": "VE.1315310486974362",
+                                    "pricing": {
+                                        "billable": False,
+                                        "pricing_model": "PMP",
+                                        "category": "service",
+                                        "type": "free_customer_service",
+                                    },
+                                }
+                            ],
+                        },
+                        "field": "messages",
+                    }
+                ],
+            }
+        ],
+    }
+
+    update = Update.model_validate(payload)
+    assert update.message is None
+    assert update.status is not None
+    assert update.status.status == "sent"
+    assert update.status.recipient_id == "584167246483"
+
+
+def test_unsupported_unknown_message_payload():
+    # Real Meta payload: message type Meta itself couldn't classify -> unsupported.type "unknown".
+    # Previously rejected by the Literal, returning HTTP 400 and triggering Meta retries.
+    payload = {
+        "object": "whatsapp_business_account",
+        "entry": [
+            {
+                "id": "734761705814489",
+                "changes": [
+                    {
+                        "value": {
+                            "messaging_product": "whatsapp",
+                            "metadata": {
+                                "display_phone_number": "584244200000",
+                                "phone_number_id": "703018172898241",
+                            },
+                            "contacts": [
+                                {
+                                    "profile": {"name": "Daniel"},
+                                    "wa_id": "584247393735",
+                                    "user_id": "VE.2364409854060810",
+                                }
+                            ],
+                            "messages": [
+                                {
+                                    "from": "584247393735",
+                                    "from_user_id": "VE.2364409854060810",
+                                    "id": "wamid.HBgMNTg0MjQ3MzkzNzM1",
+                                    "timestamp": "1782909281",
+                                    "errors": [
+                                        {
+                                            "code": 131051,
+                                            "title": "Message type unknown",
+                                            "message": "Message type unknown",
+                                            "error_data": {
+                                                "details": "Message type is currently not supported."
+                                            },
+                                        }
+                                    ],
+                                    "type": "unsupported",
+                                    "unsupported": {"type": "unknown"},
+                                }
+                            ],
+                        },
+                        "field": "messages",
+                    }
+                ],
+            }
+        ],
+    }
+    update = Update.model_validate(payload)
+    assert isinstance(update.message, UnsupportedMessage)
+    assert update.message.unsupported.type == "unknown"
+    assert update.message.errors[0].code == 131051
+
+
 def test_unsupported_message_payload():
     payload = {
         "object": "whatsapp_business_account",

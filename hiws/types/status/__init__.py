@@ -33,13 +33,15 @@ class BaseStatus(BaseModel):
     
 class SentStatus(BaseStatus):
     status: Literal["sent"]
-    conversation: StatusConversation
-    pricing: StatusPricing
-    
+    # Meta omits `conversation` on some pricing paths (e.g. PMP / free_customer_service),
+    # so it must stay optional or Update.model_validate rejects the whole webhook.
+    conversation: Optional[StatusConversation] = None
+    pricing: Optional[StatusPricing] = None
+
 class DeliveredStatus(BaseStatus):
     status: Literal["delivered"]
-    conversation: StatusConversation
-    pricing: StatusPricing
+    conversation: Optional[StatusConversation] = None
+    pricing: Optional[StatusPricing] = None
     
 class ReadStatus(BaseStatus):
     status: Literal["read"]

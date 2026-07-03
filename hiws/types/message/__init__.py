@@ -69,7 +69,9 @@ class MessageError(BaseModel):
     error_data: ErrorData
     
 class Unsupported(BaseModel):
-    type: Literal["edit", "poll", "button"]
+    # "unknown" is what Meta sends for message types it can't classify (error 131051);
+    # keep it here so these webhooks parse instead of being rejected.
+    type: Literal["edit", "poll", "button", "unknown"]
 
 class UnsupportedMessage(BaseMessage):
     errors: List[MessageError]
