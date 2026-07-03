@@ -2,6 +2,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 from hiws.types.message import Message
 from hiws.types.status import Status
+from hiws.types.call import Call
 
 
 class Profile(BaseModel):
@@ -25,6 +26,7 @@ class Value(BaseModel):
     contacts: Optional[List[RequestContact]] = None
     messages: Optional[List[Message]] = None
     statuses: Optional[List[Status]] = None
+    calls: Optional[List[Call]] = None
 
 
 class Change(BaseModel):
@@ -68,4 +70,11 @@ class Update(BaseModel):
             for change in entry.changes:
                 if change.value.contacts:
                     return change.value.contacts[0]
+        return None
+    @property
+    def call(self) -> Optional[Call]:
+        for entry in self.entry:
+            for change in entry.changes:
+                if change.value.calls:
+                    return change.value.calls[0]
         return None

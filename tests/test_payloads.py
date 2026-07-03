@@ -10,6 +10,7 @@ from hiws.types.message import (
     InteractiveMessage,
     UnsupportedMessage,
 )
+from hiws.types.call import ConnectCall, TerminateCall
 
 
 def test_text_message_payload():
@@ -735,3 +736,100 @@ def test_unsupported_message_payload():
     assert error.message == "Message type unknown"
     assert error.error_data.details == "Message type is currently not supported."
     assert update.message.unsupported.type == "edit"
+
+
+def test_call_connect_payload():
+    payload = {
+        "object": "whatsapp_business_account",
+        "entry": [
+            {
+                "id": "366634483210360",
+                "changes": [
+                    {
+                        "value": {
+                            "messaging_product": "whatsapp",
+                            "metadata": {
+                                "display_phone_number": "13175551399",
+                                "phone_number_id": "436666719526789",
+                            },
+                            "contacts": [
+                                {
+                                    "profile": {"name": "USER_DISPLAY_NAME"},
+                                    "wa_id": "16315553601",
+                                    "user_id": "BSUID",
+                                }
+                            ],
+                            "calls": [
+                                {
+                                    "id": "wacid.ABGGFjFVU2AfAgo6V-Hc5eCgK5Gh",
+                                    "to": "13175551399",
+                                    "from": "16315553601",
+                                    "from_user_id": "BSUID",
+                                    "event": "connect",
+                                    "timestamp": "1671644824",
+                                    "direction": "USER_INITIATED",
+                                    "session": {
+                                        "sdp_type": "offer",
+                                        "sdp": "v=0\r\no=- 0 0 IN IP4 127.0.0.1\r\n",
+                                    },
+                                }
+                            ],
+                        },
+                        "field": "calls",
+                    }
+                ],
+            }
+        ],
+    }
+    update = Update.model_validate(payload)
+    assert update.changed_field == "calls"
+    assert isinstance(update.call, ConnectCall)
+    assert update.call.id == "wacid.ABGGFjFVU2AfAgo6V-Hc5eCgK5Gh"
+    assert update.call.from_phone_number == "16315553601"
+    assert update.call.direction == "USER_INITIATED"
+    assert update.call.session.sdp_type == "offer"
+    assert update.call.session.sdp.startswith("v=0")
+
+
+def test_call_terminate_payload():
+    payload = {
+        "object": "whatsapp_business_account",
+        "entry": [
+            {
+                "id": "366634483210360",
+                "changes": [
+                    {
+                        "value": {
+                            "messaging_product": "whatsapp",
+                            "metadata": {
+                                "display_phone_number": "13175551399",
+                                "phone_number_id": "436666719526789",
+                            },
+                            "calls": [
+                                {
+                                    "id": "wacid.ABGGFjFVU2AfAgo6V-Hc5eCgK5Gh",
+                                    "to": "13175551399",
+                                    "from": "16315553601",
+                                    "from_user_id": "BSUID",
+                                    "event": "terminate",
+                                    "direction": "USER_INITIATED",
+                                    "timestamp": "1671644944",
+                                    "status": "Completed",
+                                    "start_time": "1671644824",
+                                    "end_time": "1671644944",
+                                    "duration": 120,
+                                    "biz_opaque_callback_data": "tracking_string",
+                                }
+                            ],
+                        },
+                        "field": "calls",
+                    }
+                ],
+            }
+        ],
+    }
+    update = Update.model_validate(payload)
+    assert isinstance(update.call, TerminateCall)
+    assert update.call.status == "Completed"
+    assert update.call.duration == 120
+    assert update.call.biz_opaque_callback_data == "tracking_string"

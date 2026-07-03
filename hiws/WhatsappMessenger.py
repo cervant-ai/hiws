@@ -1,6 +1,6 @@
 import httpx
 from hiws.types.exceptions import WhatsappApiException
-from hiws.types import Contact
+from hiws.types import Contact, CallSession
 from typing import Optional, Any, Dict, overload
 from hiws.internal.helpers import amake_cloud_api_request
 
@@ -8,6 +8,7 @@ from hiws.internal.helpers import amake_cloud_api_request
 BASE_URL = "https://graph.facebook.com/{API_VERSION}"
 MESSAGES_ENDPOINT = "/{phone_number_id}/messages"
 MEDIA_ENDPOINT = "/{phone_number_id}/media"
+CALLS_ENDPOINT = "/{phone_number_id}/calls"
 DEFAULT_TIMEOUT = 15.0
 
 
@@ -40,6 +41,7 @@ class WhatsappMessenger:
         self.base_url = BASE_URL.format(API_VERSION=self.api_version)
         self.messages_endpoint = MESSAGES_ENDPOINT.format(phone_number_id=self.phone_number_id)
         self.media_endpoint = MEDIA_ENDPOINT.format(phone_number_id=self.phone_number_id)
+        self.calls_endpoint = CALLS_ENDPOINT.format(phone_number_id=self.phone_number_id)
         self.request_timeout = request_timeout
         self.default_headers = {
             "Authorization": f"Bearer {self.access_token}",
@@ -398,6 +400,135 @@ class WhatsappMessenger:
             payload["context"] = {"message_id": reply_to}
 
         return await self._send_message_payload(payload)
+
+    async def pre_accept_call(self, call_id: str, session: CallSession) -> None:
+        """
+        Pre-accept a user-initiated call to establish the media connection early.
+
+        Pre-accepting is recommended: it lets the WebRTC media connection be
+        established before the call is fully accepted, enabling a faster connection
+        and preventing audio clipping. Call this after receiving a `connect` call
+        webhook, then call `accept_call` with the *same* session to complete it.
+
+        Args:
+            call_id (str): The id of the call (from the `connect` webhook).
+            session (CallSession): The business SDP answer (`sdp_type="answer"`).
+
+        Raises:
+            WhatsappApiException: If there is an error pre-accepting the call.
+
+        ## Documentation
+            https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/user-initiated-calls
+        """
+        payload = {
+            "messaging_product": "whatsapp",
+            "call_id": call_id,
+            "action": "pre_accept",
+            "session": session.model_dump(mode="json"),
+        }
+        await self._send_call_payload(payload)
+
+    async def accept_call(
+        self,
+        call_id: str,
+        session: CallSession,
+        biz_opaque_callback_data: Optional[str] = None,
+    ) -> None:
+        """
+        Accept a user-initiated call, completing the connection.
+
+        If the call was pre-accepted, the SDP answer in `session` must match the one
+        provided to `pre_accept_call`. Media begins flowing immediately.
+
+        Args:
+            call_id (str): The id of the call (from the `connect` webhook).
+            session (CallSession): The business SDP answer (`sdp_type="answer"`).
+            biz_opaque_callback_data (Optional[str]): Arbitrary tracking string
+                (max 512 chars) echoed back in the `terminate` webhook.
+
+        Raises:
+            WhatsappApiException: If there is an error accepting the call.
+
+        ## Documentation
+            https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/user-initiated-calls
+        """
+        payload = {
+            "messaging_product": "whatsapp",
+            "call_id": call_id,
+            "action": "accept",
+            "session": session.model_dump(mode="json"),
+        }
+        if biz_opaque_callback_data is not None:
+            payload["biz_opaque_callback_data"] = biz_opaque_callback_data
+        await self._send_call_payload(payload)
+
+    async def reject_call(self, call_id: str) -> None:
+        """
+        Reject (decline) a user-initiated call.
+
+        Args:
+            call_id (str): The id of the call (from the `connect` webhook).
+
+        Raises:
+            WhatsappApiException: If there is an error rejecting the call.
+
+        ## Documentation
+            https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/user-initiated-calls
+        """
+        payload = {
+            "messaging_product": "whatsapp",
+            "call_id": call_id,
+            "action": "reject",
+        }
+        await self._send_call_payload(payload)
+
+    async def terminate_call(self, call_id: str) -> None:
+        """
+        Terminate an active call.
+
+        Must be called to end a call initiated/answered by the business, even if an
+        RTCP BYE packet is present in the media path. When the *user* hangs up, no API
+        call is required, but a `terminate` webhook is still delivered.
+
+        Args:
+            call_id (str): The id of the call.
+
+        Raises:
+            WhatsappApiException: If there is an error terminating the call.
+
+        ## Documentation
+            https://developers.facebook.com/documentation/business-messaging/whatsapp/calling/user-initiated-calls
+        """
+        payload = {
+            "messaging_product": "whatsapp",
+            "call_id": call_id,
+            "action": "terminate",
+        }
+        await self._send_call_payload(payload)
+
+    async def _send_call_payload(self, payload: dict) -> None:
+        response = await self._send_payload(self.calls_endpoint, payload)
+        try:
+            data = response.json()
+        except ValueError as e:
+            raise WhatsappApiException(
+                message="Failed to parse JSON response",
+                endpoint=self.calls_endpoint,
+                method="POST",
+                payload=payload,
+                status_code=response.status_code,
+                details=str(e),
+            ) from e
+        success = data.get("success")
+        if not success:
+            raise WhatsappApiException(
+                message="Call action was not successful",
+                endpoint=self.calls_endpoint,
+                method="POST",
+                payload=payload,
+                status_code=response.status_code,
+                response_json=data,
+            )
 
     async def _send_message_payload(self, payload: dict) -> str:
         """
