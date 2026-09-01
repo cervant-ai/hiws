@@ -1,4 +1,4 @@
-from .types import Update
+from .types import MessageContext, Update
 from .WhatsappMessenger import WhatsappMessenger
 
-__all__ = ["Update", "WhatsappMessenger"]
+__all__ = ["MessageContext", "Update", "WhatsappMessenger"]

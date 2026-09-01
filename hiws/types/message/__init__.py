@@ -3,11 +3,17 @@ from typing import List, Optional, Union, Literal
 from hiws.types.message.contact import Contact
 
 
+class MessageContext(BaseModel):
+    from_phone_number: Optional[str] = Field(default=None, alias="from")
+    id: Optional[str] = None
+
+
 class BaseMessage(BaseModel):
     from_phone_number: str = Field(alias="from")
-    from_user_id: str
+    from_user_id: Optional[str] = None
     id: str
     timestamp: str
+    context: Optional[MessageContext] = None
 
 class Text(BaseModel):
     body: str
@@ -141,4 +147,3 @@ Message = Union[
     InteractiveMessage,
     UnsupportedMessage,
 ]
-    

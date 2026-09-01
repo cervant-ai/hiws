@@ -5,6 +5,7 @@ class StatusPricing(BaseModel):
     pricing_model: str
     billable: bool
     category: Optional[str] = None
+    type: Optional[str] = None
 
 class StatusConversationOrigin(BaseModel):
     type: str
@@ -30,27 +31,22 @@ class BaseStatus(BaseModel):
     status: Literal["delivered", "read", "failed", "sent"]
     timestamp: str
     recipient_id: str
+    recipient_user_id: Optional[str] = None
+    conversation: Optional[StatusConversation] = None
+    pricing: Optional[StatusPricing] = None
     
 class SentStatus(BaseStatus):
     status: Literal["sent"]
-    # Meta omits `conversation` on some pricing paths (e.g. PMP / free_customer_service),
-    # so it must stay optional or Update.model_validate rejects the whole webhook.
-    conversation: Optional[StatusConversation] = None
-    pricing: Optional[StatusPricing] = None
 
 class DeliveredStatus(BaseStatus):
     status: Literal["delivered"]
-    conversation: Optional[StatusConversation] = None
-    pricing: Optional[StatusPricing] = None
     
 class ReadStatus(BaseStatus):
     status: Literal["read"]
-    
+
 class FailedStatus(BaseStatus):
     status: Literal["failed"]
     errors: List[StatusError]
-    
-type Status = SentStatus | DeliveredStatus | ReadStatus | FailedStatus
-    
 
-    
+type Status = SentStatus | DeliveredStatus | ReadStatus | FailedStatus
+

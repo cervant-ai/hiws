@@ -1,0 +1,139 @@
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "WABA-ONE",
+      "changes": [
+        {
+          "field": "messages",
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": {
+              "display_phone_number": "15550000001",
+              "phone_number_id": "PHONE-ONE"
+            },
+            "contacts": [
+              {
+                "profile": {"name": "Ada Lovelace"},
+                "wa_id": "15551111111"
+              }
+            ],
+            "messages": [
+              {
+                "from": "15551111111",
+                "id": "wamid.reply-1",
+                "timestamp": "1700000001",
+                "type": "button",
+                "context": {
+                  "from": "15550000001",
+                  "id": "wamid.outbound-1",
+                  "forwarded": true,
+                  "future_context_field": "ignored"
+                },
+                "button": {
+                  "text": "Yes",
+                  "payload": "YES"
+                },
+                "future_message_field": {"ignored": true}
+              },
+              {
+                "from": "15552222222",
+                "id": "wamid.text-1",
+                "timestamp": "1700000002",
+                "type": "text",
+                "text": {"body": "Hello"}
+              }
+            ]
+          }
+        },
+        {
+          "field": "messages",
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": {
+              "display_phone_number": "15550000001",
+              "phone_number_id": "PHONE-ONE"
+            },
+            "statuses": [
+              {
+                "id": "wamid.outbound-1",
+                "status": "read",
+                "timestamp": "1700000005",
+                "recipient_id": "15551111111",
+                "recipient_user_id": "BSUID-ONE",
+                "conversation": {
+                  "id": "conversation-1",
+                  "expiration_timestamp": "1700003600",
+                  "origin": {"type": "business_initiated"},
+                  "future_conversation_field": true
+                },
+                "pricing": {
+                  "pricing_model": "CBP",
+                  "billable": true,
+                  "category": "business_initiated",
+                  "type": "regular"
+                },
+                "future_status_field": "ignored"
+              },
+              {
+                "id": "wamid.outbound-1",
+                "status": "delivered",
+                "timestamp": "1700000004",
+                "recipient_id": "15551111111",
+                "pricing": {
+                  "pricing_model": "PMP",
+                  "billable": false,
+                  "type": "free_customer_service"
+                }
+              },
+              {
+                "id": "wamid.outbound-1",
+                "status": "delivered",
+                "timestamp": "1700000004",
+                "recipient_id": "15551111111"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "WABA-TWO",
+      "changes": [
+        {
+          "field": "messages",
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": {
+              "display_phone_number": "15550000002",
+              "phone_number_id": "PHONE-TWO"
+            },
+            "statuses": [
+              {
+                "id": "wamid.outbound-2",
+                "status": "sent",
+                "timestamp": "1700000003",
+                "recipient_id": "15553333333"
+              },
+              {
+                "id": "wamid.outbound-3",
+                "status": "failed",
+                "timestamp": "1700000006",
+                "recipient_id": "15554444444",
+                "errors": [
+                  {
+                    "code": 131014,
+                    "title": "Media download failed",
+                    "message": "The media URL returned 404",
+                    "error_data": {"details": "Not Found"},
+                    "href": "https://developers.facebook.com/docs/whatsapp"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

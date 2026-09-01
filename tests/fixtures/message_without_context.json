@@ -1,0 +1,29 @@
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "WABA-ONE",
+      "changes": [
+        {
+          "field": "messages",
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": {
+              "display_phone_number": "15550000001",
+              "phone_number_id": "PHONE-ONE"
+            },
+            "messages": [
+              {
+                "from": "15551111111",
+                "id": "wamid.no-context",
+                "timestamp": "1700000010",
+                "type": "text",
+                "text": {"body": "A new conversation"}
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
