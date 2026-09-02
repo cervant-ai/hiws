@@ -124,14 +124,29 @@ class ButtonReply(BaseModel):
     id: str
     title: str
 
+
+class NFMReply(BaseModel):
+    name: Optional[str] = None
+    body: Optional[str] = None
+    response_json: str
+
+
 class Interactive(BaseModel):
-    type: Literal["list_reply", "button_reply"]
+    type: Literal["list_reply", "button_reply", "nfm_reply"]
     list_reply: Optional[ListReply] = None
     button_reply: Optional[ButtonReply] = None
+    nfm_reply: Optional[NFMReply] = None
+
 
 class InteractiveMessage(BaseMessage):
     interactive: Interactive
     type: Literal["interactive"] = "interactive"
+
+
+class OrderMessage(BaseMessage):
+    order: dict
+    type: Literal["order"] = "order"
+
 
 Message = Union[
     TextMessage,
@@ -145,5 +160,6 @@ Message = Union[
     ContactMessage,
     SystemMessage,
     InteractiveMessage,
+    OrderMessage,
     UnsupportedMessage,
 ]
