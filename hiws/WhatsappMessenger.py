@@ -2,6 +2,7 @@ import httpx
 from hiws.types.exceptions import WhatsappApiException
 from hiws.types import Contact, CallSession
 from typing import Optional, Any, Dict, overload
+from urllib.parse import urlsplit
 from hiws.internal.helpers import amake_cloud_api_request
 
 
@@ -10,6 +11,8 @@ MESSAGES_ENDPOINT = "/{phone_number_id}/messages"
 MEDIA_ENDPOINT = "/{phone_number_id}/media"
 CALLS_ENDPOINT = "/{phone_number_id}/calls"
 DEFAULT_TIMEOUT = 15.0
+CTA_URL_BODY_MAX_LENGTH = 1024
+CTA_URL_DISPLAY_TEXT_MAX_LENGTH = 20
 
 
 class WhatsappMessenger:
@@ -260,6 +263,61 @@ class WhatsappMessenger:
             "type": "contact",
             "contact": contact,
         }
+
+        return await self._send_message_payload(payload)
+
+    async def send_cta_url(
+        self,
+        recipient_phone_number: str,
+        body_text: str,
+        display_text: str,
+        url: str,
+        reply_to: Optional[str] = None
+    ) -> str:
+        """
+        Send an interactive call-to-action URL button message.
+        Args:
+            recipient_phone_number (str): The recipient's phone number in international format (without leading '+').
+            body_text (str): The message body text.
+            display_text (str): The button label.
+            url (str): The URL opened when the button is tapped. Must be an absolute HTTP(S) URL.
+            reply_to (Optional[str]): Message ID to reply to. Default is None.
+        Returns:
+            str: The message ID of the sent message.
+        Raises:
+            ValueError: If body_text, display_text or url is invalid.
+            WhatsappApiException: If there is an error sending the message.
+        ## Note
+            body_text must be 1 to 1024 characters and display_text 1 to 20 characters.
+            Only one URL button is allowed per message.
+        ## Documentation
+            https://developers.facebook.com/docs/whatsapp/cloud-api/messages/interactive-cta-url-messages
+        """
+        if not 1 <= len(body_text) <= CTA_URL_BODY_MAX_LENGTH:
+            raise ValueError(f"body_text must be 1 to {CTA_URL_BODY_MAX_LENGTH} characters.")
+        if not 1 <= len(display_text) <= CTA_URL_DISPLAY_TEXT_MAX_LENGTH:
+            raise ValueError(f"display_text must be 1 to {CTA_URL_DISPLAY_TEXT_MAX_LENGTH} characters.")
+        parsed_url = urlsplit(url)
+        if parsed_url.scheme not in ("http", "https") or not parsed_url.netloc:
+            raise ValueError("url must be an absolute HTTP(S) URL.")
+
+        payload = {
+            "messaging_product": "whatsapp",
+            "recipient_type": "individual",
+            "to": recipient_phone_number,
+            "type": "interactive",
+            "interactive": {
+                "type": "cta_url",
+                "body": {"text": body_text},
+                "action": {
+                    "name": "cta_url",
+                    "parameters": {"display_text": display_text, "url": url},
+                },
+            },
+        }
+
+        if reply_to:
+            payload["context"] = {"message_id": reply_to}
 
         return await self._send_message_payload(payload)
 
