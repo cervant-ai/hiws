@@ -9,7 +9,8 @@ class MessageContext(BaseModel):
 
 
 class BaseMessage(BaseModel):
-    from_phone_number: str = Field(alias="from")
+    # Senders with a WhatsApp username (BSUID) may come without a phone number.
+    from_phone_number: Optional[str] = Field(default=None, alias="from")
     from_user_id: Optional[str] = None
     id: str
     timestamp: str
@@ -24,7 +25,8 @@ class TextMessage(BaseMessage):
     
 class Reaction(BaseModel):
     message_id: str
-    emoji: str
+    # Omitted when the user removes their reaction.
+    emoji: Optional[str] = None
     
 class ReactionMessage(BaseMessage):
     reaction: Reaction
@@ -61,6 +63,10 @@ class DocumentMessage(BaseMessage):
     document: Document
     type: Literal["document"] = "document"
     
+class VideoMessage(BaseMessage):
+    video: Media
+    type: Literal["video"] = "video"
+
 class StickerMessage(BaseMessage):
     sticker: Media
     type: Literal["sticker"] = "sticker"
@@ -71,16 +77,17 @@ class ErrorData(BaseModel):
 class MessageError(BaseModel):
     code: int
     title: str
-    message: str
-    error_data: ErrorData
+    message: Optional[str] = None
+    error_data: Optional[ErrorData] = None
     
 class Unsupported(BaseModel):
-    # "unknown" is what Meta sends for message types it can't classify (error 131051);
-    # keep it here so these webhooks parse instead of being rejected.
-    type: Literal["edit", "poll", "button", "unknown"]
+    # Known values: "edit", "poll", "button", "unknown", "album". Meta keeps adding
+    # new ones, so accept any string instead of rejecting the webhook.
+    type: str
+    raw_type: Optional[str] = None
 
 class UnsupportedMessage(BaseMessage):
-    errors: List[MessageError]
+    errors: List[MessageError] = []
     type: Literal["unsupported"] = "unsupported"
     unsupported: Unsupported
     
@@ -108,8 +115,12 @@ class QuickReplyButtonMessage(BaseMessage):
     
 class SystemUpdate(BaseModel):
     body: str
-    type: Literal["system"] = "system"
+    # e.g. "user_changed_number", "customer_identity_changed".
+    type: str = "system"
     new_wa_id: Optional[str] = None
+    wa_id: Optional[str] = None
+    user_id: Optional[str] = None
+    previous_user_id: Optional[str] = None
     
 class SystemMessage(BaseMessage):
     system: SystemUpdate
@@ -152,6 +163,7 @@ Message = Union[
     TextMessage,
     ReactionMessage,
     ImageMessage,
+    VideoMessage,
     AudioMessage,
     DocumentMessage,
     StickerMessage,

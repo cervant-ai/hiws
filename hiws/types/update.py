@@ -11,7 +11,8 @@ class Profile(BaseModel):
 
 class RequestContact(BaseModel):
     profile: Optional[Profile] = None
-    wa_id: str
+    # Absent for senders identified only by a WhatsApp username (BSUID).
+    wa_id: Optional[str] = None
     user_id: Optional[str] = None
 
 
