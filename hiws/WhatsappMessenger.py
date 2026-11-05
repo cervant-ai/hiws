@@ -15,6 +15,13 @@ CTA_URL_BODY_MAX_LENGTH = 1024
 CTA_URL_DISPLAY_TEXT_MAX_LENGTH = 20
 
 
+def _recipient_field(recipient: str) -> Dict[str, str]:
+    """Phone numbers go in `to`; business-scoped user IDs (e.g. "US.13491208655302741918") go in `recipient`."""
+    if recipient.lstrip("+").isdigit():
+        return {"to": recipient}
+    return {"recipient": recipient}
+
+
 class WhatsappMessenger:
     """
     A class to interact with the WhatsApp Cloud API.
@@ -61,7 +68,7 @@ class WhatsappMessenger:
         """
         Send a text message.
         Args:
-            recipient_phone_number (str): The recipient's phone number in international format (without leading '+').
+            recipient_phone_number (str): The recipient's phone number in international format (without leading '+'), or their business-scoped user ID.
             text (str): The text message to send.
             enable_link_preview (bool): Whether to enable link preview. Default is True.
             reply_to (Optional[str]): Message ID to reply to. Default is None.
@@ -82,7 +89,7 @@ class WhatsappMessenger:
         payload = {
             "messaging_product": "whatsapp",
             "recipient_type": "individual",
-            "to": recipient_phone_number,
+            **_recipient_field(recipient_phone_number),
             "type": "text",
             "text": {"preview_url": enable_link_preview, "body": text},
         }
@@ -103,7 +110,7 @@ class WhatsappMessenger:
         """
         Send an image.
         Args:
-            recipient_phone_number (str): The recipient's phone number in international format (without leading '+').
+            recipient_phone_number (str): The recipient's phone number in international format (without leading '+'), or their business-scoped user ID.
             image_link (Optional[str]): The URL of the image to send. Default is None.
             media_id (Optional[str]): The media ID of a previously uploaded image. Default is None.
             caption (Optional[str]): Caption for the image. Default is None.
@@ -140,7 +147,7 @@ class WhatsappMessenger:
         """
         Send a document.
         Args:
-            recipient_phone_number (str): The recipient's phone number in international format (without leading '+').
+            recipient_phone_number (str): The recipient's phone number in international format (without leading '+'), or their business-scoped user ID.
             document_link (Optional[str]): The URL of the document to send. Default is None.
             media_id (Optional[str]): The media ID of a previously uploaded document. Default is None.
             caption (Optional[str]): Caption for the document. Default is None.
@@ -178,7 +185,7 @@ class WhatsappMessenger:
         """
         Send an audio message.
         Args:
-            recipient_phone_number (str): The recipient's phone number in international format (without leading '+').
+            recipient_phone_number (str): The recipient's phone number in international format (without leading '+'), or their business-scoped user ID.
             audio_link (Optional[str]): The URL of the audio to send. Default is None.
             media_id (Optional[str]): The media ID of a previously uploaded audio. Default is None.
             caption (Optional[str]): Caption for the audio. Default is None.
@@ -212,7 +219,7 @@ class WhatsappMessenger:
         """
         Send a video message.
         Args:
-            recipient_phone_number (str): The recipient's phone number in international format (without leading '+').
+            recipient_phone_number (str): The recipient's phone number in international format (without leading '+'), or their business-scoped user ID.
             video_link (Optional[str]): The URL of the video to send. Default is None.
             media_id (Optional[str]): The media ID of a previously uploaded video. Default is None.
             caption (Optional[str]): Caption for the video. Default is None.
@@ -245,7 +252,7 @@ class WhatsappMessenger:
         """
         Send a contact message.
         Args:
-            recipient_phone_number (str): The recipient's phone number in international format (without leading '+').
+            recipient_phone_number (str): The recipient's phone number in international format (without leading '+'), or their business-scoped user ID.
             contact (Contact | Dict[str, Any]): The contact information to send.
         Returns:
             str: The message ID of the sent message.
@@ -259,7 +266,7 @@ class WhatsappMessenger:
         payload = {
             "messaging_product": "whatsapp",
             "recipient_type": "individual",
-            "to": recipient_phone_number,
+            **_recipient_field(recipient_phone_number),
             "type": "contact",
             "contact": contact,
         }
@@ -277,7 +284,7 @@ class WhatsappMessenger:
         """
         Send an interactive call-to-action URL button message.
         Args:
-            recipient_phone_number (str): The recipient's phone number in international format (without leading '+').
+            recipient_phone_number (str): The recipient's phone number in international format (without leading '+'), or their business-scoped user ID.
             body_text (str): The message body text.
             display_text (str): The button label.
             url (str): The URL opened when the button is tapped. Must be an absolute HTTP(S) URL.
@@ -304,7 +311,7 @@ class WhatsappMessenger:
         payload = {
             "messaging_product": "whatsapp",
             "recipient_type": "individual",
-            "to": recipient_phone_number,
+            **_recipient_field(recipient_phone_number),
             "type": "interactive",
             "interactive": {
                 "type": "cta_url",
@@ -449,7 +456,7 @@ class WhatsappMessenger:
         payload = {
             "messaging_product": "whatsapp",
             "recipient_type": "individual",
-            "to": recipient_phone_number,
+            **_recipient_field(recipient_phone_number),
             "type": media_type,
             media_type: media_payload,
         }

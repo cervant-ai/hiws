@@ -114,3 +114,27 @@ async def test_send_text_payload_unchanged(messenger):
             "context": {"message_id": "wamid.PARENT"},
         }
     ]
+
+
+@pytest.mark.asyncio
+async def test_send_text_to_phone_number_uses_to(messenger):
+    await messenger.send_text(recipient_phone_number="16505551234", text="Hi")
+
+    assert messenger.sent_payloads[0]["to"] == "16505551234"
+    assert "recipient" not in messenger.sent_payloads[0]
+
+
+@pytest.mark.asyncio
+async def test_send_text_to_bsuid_uses_recipient(messenger):
+    await messenger.send_text(recipient_phone_number="US.13491208655302741918", text="Hi")
+
+    assert messenger.sent_payloads[0]["recipient"] == "US.13491208655302741918"
+    assert "to" not in messenger.sent_payloads[0]
+
+
+@pytest.mark.asyncio
+async def test_send_image_to_bsuid_uses_recipient(messenger):
+    await messenger.send_image(recipient_phone_number="PE.2876", image_link="https://example.com/a.png")
+
+    assert messenger.sent_payloads[0]["recipient"] == "PE.2876"
+    assert "to" not in messenger.sent_payloads[0]
